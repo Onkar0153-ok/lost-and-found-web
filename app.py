@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, redirect, session, url_for, abort
-from flask_mysqldb import MySQL
-from werkzeug.security import generate_password_hash, check_password_hash
 import os
+from flask import Flask, render_template, request, redirect, session, url_for
+import mysql.connector  # Changed from flask_mysqldb
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
 
@@ -11,14 +11,18 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.secret_key = 'secretkey'
+app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
 
-# ------------------ MYSQL CONFIG ------------------
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '@Onkar2311' 
-app.config['MYSQL_DB'] = 'lostfound'
-mysql = MySQL(app)
+# ------------------ DATABASE HELPER ------------------
+# This function connects to the cloud database using environment variables
+def get_db():
+    return mysql.connector.connect(
+        host=os.environ.get('MYSQL_HOST', 'localhost'),
+        user=os.environ.get('MYSQL_USER', 'root'),
+        password=os.environ.get('MYSQL_PASSWORD', '@Onkar2311'),
+        database=os.environ.get('MYSQL_DB', 'lostfound'),
+        port=int(os.environ.get('MYSQL_PORT', 3306))
+    )
 
 # ------------------ ADMIN WRAPPER ------------------
 def admin_required(f):
@@ -41,11 +45,13 @@ def register():
         name = request.form['name']
         email = request.form['email']
         password = generate_password_hash(request.form['password'])
-        cur = mysql.connection.cursor()
-        # Default is_admin is 0
+        
+        db = get_db()
+        cur = db.cursor()
         cur.execute("INSERT INTO users(name,email,password,is_admin) VALUES(%s,%s,%s,0)", (name,email,password))
-        mysql.connection.commit()
+        db.commit()
         cur.close()
+        db.close()
         return redirect('/login')
     return render_template('register.html')
 
@@ -54,15 +60,18 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        cur = mysql.connection.cursor()
+        
+        db = get_db()
+        cur = db.cursor()
         cur.execute("SELECT id, name, email, password, is_admin FROM users WHERE email=%s", (email,))
         user = cur.fetchone()
         cur.close()
+        db.close()
         
         if user and check_password_hash(user[3], password):
             session['user_id'] = user[0]
             session['user_name'] = user[1]
-            session['is_admin'] = user[4] # Store admin status
+            session['is_admin'] = user[4]
             return redirect('/dashboard')
     return render_template('login.html')
 
@@ -97,20 +106,23 @@ def post_item():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-        cur = mysql.connection.cursor()
+        db = get_db()
+        cur = db.cursor()
         cur.execute("""
             INSERT INTO items(title, description, category, status, location, image, user_id, date_found, contact_info)
             VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (title, description, category, status, location, filename, session['user_id'], date_found, contact_info))
-        mysql.connection.commit()
+        db.commit()
         cur.close()
+        db.close()
         return redirect('/items')
     return render_template('post_item.html')
 
 @app.route('/items')
 def items():
     search = request.args.get('search')
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
     query = """
         SELECT items.id, items.title, items.description, items.category, 
                items.status, items.location, items.image, items.user_id, 
@@ -124,13 +136,15 @@ def items():
         cur.execute(query)
     data = cur.fetchall()
     cur.close()
+    db.close()
     return render_template('view_items.html', items=data)
 
 @app.route('/my_posts')
 def my_posts():
     if 'user_id' not in session:
         return redirect('/login')
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
     cur.execute("""
         SELECT items.id, items.title, items.description, items.category, 
                items.status, items.location, items.image, items.user_id, 
@@ -141,6 +155,7 @@ def my_posts():
     """, (session['user_id'],))
     data = cur.fetchall()
     cur.close()
+    db.close()
     return render_template('view_items.html', items=data)
 
 @app.route('/delete/<int:id>')
@@ -148,57 +163,51 @@ def delete_item(id):
     if 'user_id' not in session:
         return redirect('/login')
         
-    cur = mysql.connection.cursor()
+    db = get_db()
+    cur = db.cursor()
     
-    # Check if user owns the post OR is an admin
     if session.get('is_admin') == 1:
         cur.execute("DELETE FROM items WHERE id=%s", (id,))
     else:
         cur.execute("DELETE FROM items WHERE id=%s AND user_id=%s", (id, session['user_id']))
     
-    mysql.connection.commit()
+    db.commit()
     cur.close()
+    db.close()
     return redirect('/items')
-
-# ------------------ ADMIN ONLY ROUTES ------------------
 
 @app.route('/admin/dashboard')
 @admin_required
 def admin_panel():
-    cur = mysql.connection.cursor()
-    # Get all items
+    db = get_db()
+    cur = db.cursor()
     cur.execute("SELECT items.id, items.title, users.name, items.status FROM items JOIN users ON items.user_id = users.id")
     items = cur.fetchall()
     
-    # Get all users (except self)
     cur.execute("SELECT id, name, email, is_admin FROM users WHERE id != %s", (session['user_id'],))
     users = cur.fetchall()
     cur.close()
+    db.close()
     return render_template('admin.html', items=items, users=users)
 
-@app.route('/admin/delete_user/<int:id>')
-@admin_required
-def delete_user(id):
-    cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM users WHERE id=%s", (id,))
-    mysql.connection.commit()
-    cur.close()
-    return redirect('/admin/dashboard')
 @app.route('/resolve/<int:id>')
 def resolve_item(id):
     if 'user_id' not in session:
         return redirect('/login')
         
-    cur = mysql.connection.cursor()
-    # Check if user owns the post OR is an admin
+    db = get_db()
+    cur = db.cursor()
     if session.get('is_admin') == 1:
         cur.execute("UPDATE items SET status='resolved' WHERE id=%s", (id,))
     else:
         cur.execute("UPDATE items SET status='resolved' WHERE id=%s AND user_id=%s", (id, session['user_id']))
     
-    mysql.connection.commit()
+    db.commit()
     cur.close()
+    db.close()
     return redirect('/items')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Use the port assigned by the server, or 5000 for local testing
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
