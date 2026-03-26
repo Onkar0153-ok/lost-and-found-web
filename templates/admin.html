@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-3 mb-4">
+        <div class="card border-0 shadow-sm p-3" style="border-radius: 15px; background: #f8f9fa;">
+            <div class="card-body">
+                <h5 class="fw-bold mb-4">Admin Controls</h5>
+                <hr>
+                <div class="mb-3">
+                    <small class="text-muted d-block text-uppercase fw-bold">Items Managed</small>
+                    <span class="fs-4 fw-bold text-primary">{{ items|length }}</span>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block text-uppercase fw-bold">Active Users</small>
+                    <span class="fs-4 fw-bold text-success">{{ users|length + 1 }}</span>
+                </div>
+                <hr>
+                <a href="/dashboard" class="btn btn-outline-dark w-100 rounded-pill btn-sm">Return to Portal</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-9">
+        <div class="card border-0 shadow-sm mb-5" style="border-radius: 20px;">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h4 class="fw-bold"><span class="me-2">👥</span> User Management</h4>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user[1] }}</td>
+                                <td>{{ user[2] }}</td>
+                                <td>
+                                    {% if user[3] == 1 %}
+                                    <span class="badge bg-info text-dark">Admin</span>
+                                    {% else %}
+                                    <span class="badge bg-light text-dark border">Student</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="/admin/delete_user/{{ user[0] }}" 
+                                       class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                                       onclick="return confirm('WARNING: Deleting a user will remove all their posts. Proceed?')">
+                                       Remove User
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h4 class="fw-bold"><span class="me-2">📦</span> Global Item Feed</h4>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Item Title</th>
+                                <th>Posted By</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td class="fw-bold">{{ item[1] }}</td>
+                                <td class="text-muted">{{ item[2] }}</td>
+                                <td>
+                                    <span class="badge {% if item[3] == 'lost' %}bg-danger{% else %}bg-success{% endif %}">
+                                        {{ item[3]|upper }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="/delete/{{ item[0] }}" 
+                                       class="btn btn-sm btn-danger rounded-pill px-3">
+                                       Delete Post
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if not items %}
+                <p class="text-center text-muted py-4">No items have been reported yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

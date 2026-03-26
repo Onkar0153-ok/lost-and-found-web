@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card p-4 shadow-sm border-0" style="border-radius: 15px;">
+            <h3 class="mb-4 text-center fw-bold text-primary">Post an Item</h3>
+            <form method="POST" enctype="multipart/form-data">
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Item Title</label>
+                    <input type="text" name="title" class="form-control" placeholder="e.g. Blue Nike Bag" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Detailed Description</label>
+                    <textarea name="description" class="form-control" rows="3" placeholder="Mention color, brand, or unique marks..." required></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Category</label>
+                        <input type="text" name="category" class="form-control" placeholder="Electronics, Pets, etc.">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="lost">Lost</option>
+                            <option value="found">Found</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Location</label>
+                        <input type="text" name="location" class="form-control" placeholder="Area / Landmark" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Date Lost/Found</label>
+                        <input type="date" name="date_found" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Phone Number / WhatsApp (Optional)</label>
+                    <input type="text" name="contact_info" class="form-control" placeholder="e.g. +91 98765 43210">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Upload Image</label>
+                    <input type="file" name="image" class="form-control">
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">Submit Posting</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

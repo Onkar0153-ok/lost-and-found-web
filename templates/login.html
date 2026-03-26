@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* Smooth Animated Gradient Background */
+    body {
+        background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Glassmorphism Card */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease;
+    }
+
+    .glass-card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* Modern Button Styling */
+    .btn-animate {
+        transition: all 0.3s;
+    }
+    
+    .btn-animate:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="glass-card p-5 mt-5">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">Welcome Back</h2>
+                    <p class="text-muted">Login to access your dashboard</p>
+                </div>
+                
+                <form method="POST">
+                    <div class="form-floating mb-3">
+                        <input type="email" name="email" class="form-control border-0 bg-light" id="floatingInput" placeholder="name@example.com" required>
+                        <label for="floatingInput">Email address</label>
+                    </div>
+                    
+                    <div class="form-floating mb-4">
+                        <input type="password" name="password" class="form-control border-0 bg-light" id="floatingPassword" placeholder="Password" required>
+                        <label for="floatingPassword">Password</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-dark w-100 py-3 fw-bold btn-animate rounded-pill shadow">
+                        LOG IN
+                    </button>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <p class="small text-muted">New user? <a href="/register" class="text-decoration-none fw-bold text-primary">Create Account</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

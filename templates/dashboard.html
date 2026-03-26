@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row mb-5">
+    <div class="col-12 text-center text-md-start">
+        <h1 class="fw-bold text-dark">Welcome back, User! 👋</h1>
+        <p class="text-muted">Manage your reports and help the community find what they've lost.</p>
+    </div>
+</div>
+
+<div class="row mb-5 g-4 text-center">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3" style="border-radius: 15px; border-left: 5px solid #0d6efd !important;">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted small fw-bold">Browse All</h6>
+                <h2 class="fw-bold mb-0">Explore</h2>
+                <p class="small text-primary mb-0 mt-2">Check recent updates</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3" style="border-radius: 15px; border-left: 5px solid #dc3545 !important;">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted small fw-bold">Action Needed</h6>
+                <h2 class="fw-bold mb-0">Post</h2>
+                <p class="small text-danger mb-0 mt-2">Report a new item</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3" style="border-radius: 15px; border-left: 5px solid #198754 !important;">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted small fw-bold">Personal</h6>
+                <h2 class="fw-bold mb-0">My Activity</h2>
+                <p class="small text-success mb-0 mt-2">Manage your posts</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm text-center p-4 hover-shadow" style="border-radius: 20px; transition: 0.3s;">
+            <div class="mb-3">
+                <span class="display-4">📝</span>
+            </div>
+            <h4 class="fw-bold">Report an Item</h4>
+            <p class="text-muted px-3">Lost something or found a stray item? Post the details here to notify others.</p>
+            <a href="/post" class="btn btn-primary rounded-pill px-4 fw-bold mt-auto">Create Post</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm text-center p-4 hover-shadow" style="border-radius: 20px; transition: 0.3s;">
+            <div class="mb-3">
+                <span class="display-4">🔍</span>
+            </div>
+            <h4 class="fw-bold">Browse Items</h4>
+            <p class="text-muted px-3">Search through the list of items reported by the community in your area.</p>
+            <a href="/items" class="btn btn-outline-primary rounded-pill px-4 fw-bold mt-auto">View All</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4 mx-auto">
+        <div class="card h-100 border-0 shadow-sm text-center p-4 hover-shadow" style="border-radius: 20px; transition: 0.3s;">
+            <div class="mb-3">
+                <span class="display-4">👤</span>
+            </div>
+            <h4 class="fw-bold">My Postings</h4>
+            <p class="text-muted px-3">Need to delete or check on an item you previously reported? Manage them here.</p>
+            <a href="/my_posts" class="btn btn-dark rounded-pill px-4 fw-bold mt-auto">Manage Posts</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-shadow:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
+    }
+</style>
+{% if session['is_admin'] == 1 %}
+<div class="alert shadow-sm d-flex justify-content-between align-items-center mb-5" 
+     style="background: #050a10; border-radius: 15px; border-left: 5px solid #00d4ff;">
+    <div class="ms-3">
+        <h5 class="mb-0 fw-bold text-white">🛡️ Admin Control Active</h5>
+        <small style="color: #00d4ff;">You have full access to manage users and posts.</small>
+    </div>
+    <a href="/admin/dashboard" class="btn btn-light rounded-pill px-4 fw-bold me-2">Open Admin Panel</a>
+</div>
+{% endif %}
+
+{% endblock %}
